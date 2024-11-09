@@ -48,9 +48,31 @@ function Login() {
       
 
       if (response.ok) {
-        // const result = await response.json();
-        // console.log('Login successful:', result);
-        navigate(`/Admin?login=${token_key}&id=${id}`);
+        let loginCountKey = `${id}_login_count`;
+        let loginCount = localStorage.getItem(loginCountKey);
+
+        if (!loginCount) {
+            // If first time login, set count to 1 and redirect to reset password page
+            localStorage.setItem(loginCountKey, 1);
+            alert("This is your first login. Please reset your password.");
+            
+            window.location = `resetpassword.html?login=${token_key}&id=${id}`;
+            return; // Stop further execution after redirection
+        } else {
+            // Increment login count
+            loginCount = parseInt(loginCount) + 1;
+            localStorage.setItem(loginCountKey, loginCount);
+        }
+
+        console.log(`User has logged in ${loginCount} times`);
+
+        // Redirect based on user type
+        if (user_type === 'Admin') {
+          navigate(`/Admin?login=${token_key}&id=${id}`);
+        } else if (user_type === "employee") {
+          navigate(`/Employee?login=${token_key}&id=${id}`);
+        }
+        
       } else {
 
         console.log('Login failed:', errorResult.message);
@@ -67,6 +89,7 @@ function Login() {
 
   return (
     <>
+    <div>
       <div>
         <nav className="p-2">
           <div className="d-flex justify-content-between align-items-center">
@@ -116,7 +139,7 @@ function Login() {
         <div>
           <form
             onSubmit={handleSubmit}
-            className="d-flex justify-content-center align-items-center flex-column bord"
+            className="d-flex justify-content-center align-items-center flex-column "
           >
             <h1 className="fw-bold text-center pt-5">
               <i
@@ -184,14 +207,16 @@ function Login() {
         </div>
       </div>
 
-      <span className="welcome position-absolute top-0 start-50 translate-middle-x">
+      {/* <span className="welcome position-absolute top-0 start-50 translate-middle-x">
         WELCOME
-      </span>
+      </span> */}
 
       <div className="position-absolute top-50 end-0 translate-middle-y login-amico">
         {/* Optional image */}
         <img src="https://example.com/image.jpg" style={{ width: 600, height: 600 }} alt="Login illustration" />
       </div>
+
+    </div>
     </>
   );
 }
